@@ -6,21 +6,12 @@ import os
 import sys
 
 URLs = ['http://www1.eere.energy.gov/water/']
-BASEURL = ['http://www1.eere.energy.gov', '']
+BASEURL = ['http://www1.eere.energy.gov', 
+'http://apps1.eere.energy.gov']
 
-def pdfs():
+
+def pdf():
 	for link in soup.findAll(href = compile('\.pdf$')):
-		file = link.get('href')
-		filename = file.split('/')[-1]
-		if file[0] == "/":
-			urlretrieve(BASEURL + file, filename)
-			print BASEURL + file
-		else:
-			urlretrieve(file, filename)
-			print file
-
-def docs():
-	for link in soup.findAll(href = compile('\.doc$')):
 		file = link.get('href')
 		filename = file.split('/')[-1]
 		try:	
@@ -37,6 +28,17 @@ def docs():
 		except:
 			print "Error downloading" + file
 			pass
+"""
+def docs():
+	for link in soup.findAll(href = compile('\.pdf$')):
+		file = link.get('href')
+		filename = file.split('/')[-1]
+		if file[0] == "/":
+			urlretrieve(BASEURL + file, filename)
+			print BASEURL + file
+		else:
+			urlretrieve(file, filename)
+			print file
 
 def excel():
 	for link in soup.findAll(href = compile('\.xls$')):
@@ -70,12 +72,13 @@ def png():
 		else:
 			urlretrieve(file, filename)
 			print file
+"""
 
 if __name__ == "__main__":
 	for url in URLs:
 		soup = BeautifulSoup(urlopen(url))
 		pdfs()
-		jpg()
-		png()
-		excel()
-		docs()
+		#jpg()
+		#png()
+		#excel()
+		#docs()
