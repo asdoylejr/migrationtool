@@ -5,8 +5,8 @@ from re import compile
 import os
 import sys
 
-URLs = []
-BASEURL = ''
+URLs = ['http://www1.eere.energy.gov/water/']
+BASEURL = ['http://www1.eere.energy.gov', '']
 
 def pdfs():
 	for link in soup.findAll(href = compile('\.pdf$')):
@@ -23,12 +23,20 @@ def docs():
 	for link in soup.findAll(href = compile('\.doc$')):
 		file = link.get('href')
 		filename = file.split('/')[-1]
-		if file[0] == "/":
-			urlretrieve(BASEURL + file, filename)
-			print BASEURL + file
-		else:
-			urlretrieve(file, filename)
-			print file
+		try:	
+			if file[0] == "/":
+				try:
+					urlretrieve(BASEURL[0] + file, filename)
+					print BASEURL + file
+				except:
+					urlretrieve(BASEURL[1] + file, filename)
+					print BASEURL + file
+			else:
+				urlretrieve(file, filename)
+				print file
+		except:
+			print "Error downloading" + file
+			pass
 
 def excel():
 	for link in soup.findAll(href = compile('\.xls$')):
