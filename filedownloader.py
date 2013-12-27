@@ -5,12 +5,14 @@ import os
 import sys
 import urlparse
 
-URLs = ['http://www1.eere.energy.gov/wind']
+#A list of URLs for the script to iterate through.
+URLs = []
 
-BASEURL = ['http://www1.eere.energy.gov/', 'http://www1.eere.energy.gov', 'http://www1.eere.energy.gov/wind/']
-
+#A list of file types for the script to iterate through for every URL.
 FILETYPE = ['\.pdf$','\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$']
 
+#The main function.  Identifies and downloads all of the links with file
+#extensions inside of each BeautifulSoup object.
 def main(soup, domain, path, types):
 	for link in soup.findAll(href = compile(types)):
 		file = link.get('href')
@@ -21,6 +23,8 @@ def main(soup, domain, path, types):
 				file = urlparse.urljoin(path, file)
 			file = urlparse.urljoin(domain, file)
 		
+		#Attempts to download each file and returns an error with the file so
+		#that it can be dealt with manually.
 		try:
 			urlretrieve(file, filename)
 			print file
@@ -30,6 +34,8 @@ def main(soup, domain, path, types):
 		
 if __name__ == "__main__":
 
+	#Opens each URL from the URLs list and creates a BS object of them for the 
+	#script to manipulate.
 	for url in URLs:
 		html_data = urlopen(url)
 		soup = BeautifulSoup(html_data)
@@ -37,6 +43,7 @@ if __name__ == "__main__":
 		urlinfo = urlparse.urlparse(url)
 		domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
 		path = urlinfo.path.rsplit('/', 1)[0]
-                
+         
+        #With each URL the script searches for all listed file types.      
 		for types in FILETYPE:
 			main(soup, domain, path, types)
