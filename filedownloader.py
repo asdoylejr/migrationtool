@@ -27,7 +27,7 @@ def main(soup, domain, path, types):
 		#that it can be dealt with manually.
 		try:
 			urlretrieve(file, filename)
-			print file
+			print url, ': ', file
 		except:
 			print 'Error retrieving %s using URL %s' % (link.get('href'), file)
 		
