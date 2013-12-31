@@ -5,9 +5,6 @@ import os
 import sys
 import urlparse
 
-#A list of URLs for the script to iterate through.
-URLs = []
-
 #A list of file types for the script to iterate through for every URL.
 FILETYPE = ['\.pdf$','\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$']
 
@@ -26,7 +23,7 @@ def main(soup, domain, path, types):
 		#Attempts to download each file and returns an error with the file so
 		#that it can be dealt with manually.
 		try:
-			urlretrieve(file, filename)
+			#urlretrieve(file, filename)
 			print url, ': ', file
 		except:
 			print 'Error retrieving %s using URL %s' % (link.get('href'), file)
@@ -34,16 +31,15 @@ def main(soup, domain, path, types):
 		
 if __name__ == "__main__":
 
-	#Opens each URL from the URLs list and creates a BS object of them for the 
-	#script to manipulate.
-	for url in URLs:
-		html_data = urlopen(url)
-		soup = BeautifulSoup(html_data)
+	with open('urlfile.txt', 'rU') as f:
+		for url in f:
+			html_data = urlopen(url)
+			soup = BeautifulSoup(html_data)
 		
-		urlinfo = urlparse.urlparse(url)
-		domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
-		path = urlinfo.path.rsplit('/', 1)[0]
-         
-        #With each URL the script searches for all listed file types.      
-		for types in FILETYPE:
-			main(soup, domain, path, types)
+			urlinfo = urlparse.urlparse(url)
+			domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
+			path = urlinfo.path.rsplit('/', 1)[0]
+		     
+		    #With each URL the script searches for all listed file types.      
+			for types in FILETYPE:
+				main(soup, domain, path, types)
