@@ -6,11 +6,14 @@ import sys
 import urlparse
 
 #A list of file types for the script to iterate through for every URL.
-FILETYPE = ['\.pdf$','\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$']
+FILETYPE = ['\.pdf$','\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$', '\.mp3$', '\.f4v$', '\.mp4$']
+#FILETYPE = ['\.wmv$', '\.f4v$', '\.mp4$']
 
 #The main function.  Identifies and downloads all of the links with file
 #extensions inside of each BeautifulSoup object.
+
 def main(soup, domain, path, types):
+	
 	for link in soup.findAll(href = compile(types)):
 		file = link.get('href')
 		filename = file.split('/')[-1]
@@ -33,7 +36,11 @@ if __name__ == "__main__":
 
 	with open('urlfile.txt', 'rU') as f:
 		for url in f:
-			html_data = urlopen(url)
+			try:
+				html_data = urlopen(url)
+			except:
+				print 'Error opening: ' + url
+				pass
 			soup = BeautifulSoup(html_data)
 		
 			urlinfo = urlparse.urlparse(url)
