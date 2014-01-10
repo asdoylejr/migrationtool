@@ -1,52 +1,55 @@
 from BeautifulSoup import BeautifulSoup
 from urllib import urlretrieve, urlopen
 from re import compile
-import os
 import sys
+import time
 import urlparse
 
-#A list of file types for the script to iterate through for every URL.
 FILETYPE = ['\.pdf$','\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$', '\.mp3$', '\.f4v$', '\.mp4$']
-#FILETYPE = ['\.wmv$', '\.f4v$', '\.mp4$']
 
-#The main function.  Identifies and downloads all of the links with file
-#extensions inside of each BeautifulSoup object.
-
-def main(soup, domain, path, types):
+def Percentage(count, block_size, total_size):
+	global start_time
 	
-	for link in soup.findAll(href = compile(types)):
-		file = link.get('href')
-		filename = file.split('/')[-1]
-		
-		if '://' not in file and not file.startswith('//'):
-			if not file.startswith('/'):
-				file = urlparse.urljoin(path, file)
-			file = urlparse.urljoin(domain, file)
-		
-		#Attempts to download each file and returns an error with the file so
-		#that it can be dealt with manually.
-		try:
-			#urlretrieve(file, filename)
-			print url, ': ', file
-		except:
-			print 'Error retrieving %s using URL %s' % (link.get('href'), file)
-		
-		
-if __name__ == "__main__":
+	if count == 0:
+		start_time = time.time()
+		return
+	duration = time.time() - start_time
+	progress_size = int(count * block_size)
+	speed = int(progress_size / (1024 * duration))
+	percent = min(int(count * block_size * 100 / total_size), 100)
+	sys.stdout.write("\r...%d%%, %d MB, %d KB/s" % (percent, progress_size / (1024 * 1024), speed))
+	sys.stdout.flush()
 
+def Downloader():
 	with open('urlfile.txt', 'rU') as f:
 		for url in f:
 			try:
 				html_data = urlopen(url)
 			except:
-				print 'Error opening: ' + url
+				print 'Error opening URL: ' + url
 				pass
+	
 			soup = BeautifulSoup(html_data)
-		
 			urlinfo = urlparse.urlparse(url)
 			domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
 			path = urlinfo.path.rsplit('/', 1)[0]
-		     
-		    #With each URL the script searches for all listed file types.      
+		
 			for types in FILETYPE:
-				main(soup, domain, path, types)
+				for link in soup.findAll(href = compile(types)):
+					file = link.get('href')
+					filename = file.split('/')[-1]
+				
+					if '://' not in file and not file.startswith('//'):
+						if not file.startswith('/'):
+							file = urlparse.urljoin(path, file)
+						file = urlparse.urljoin(domain, file)
+				
+					try:
+						print url, ': ', file
+						urlretrieve(file, filename, Percentage)		
+					except:
+						print 'Error retrieving %s ursing URL %s' % (link.get('href'), file)
+
+if __name__ == '__main__':
+	Downloader()
+		
