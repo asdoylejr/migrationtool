@@ -1,33 +1,34 @@
 """
 Script to extract metadata from PDFs.
 """
+import glob
 from pyPdf import PdfFileReader
+import csv
+import os
+import sys
 
-BASEDIR = ''
-PDFFiles = []
-def extractor():
-	output = open('windoutput.txt', 'r+')
-	for file in PDFFiles:
-		"""
-		Processes the files in the PDFFiles list.  If the document 
-		is missing data, it will pass and continue so you can 
-		inspect the exceptions by hand.
-		"""
-		try:
-			pdf_toread = PdfFileReader(open(BASEDIR + file, 'r'))
-			pdf_info = pdf_toread.getDocumentInfo()
-			
-			#print str(pdf_info)   #print full metadata if you want
-			
-			x = file + "~" + pdf_info['/Title'] + " ~ " + pdf_info['/Subject']
-			print x
-			output.write(x + '\n')
-		except:
-			x = file + '~' + ' ERROR: Data missing or corrupt'
-			print x
-			output.write(x + '\n')
-			pass
-	output.close()
+def extractor():	
+	basedir = os.getcwd()
+	pdffiles = []
+	for x in os.listdir(basedir):
+		if x[-3:] == 'pdf':
+			pdffiles.append(x)
+	
+	with open('pdfmetadata.csv', 'w') as csvfile:
+		writer = csv.writer(csvfile)
+		for f in pdffiles:
+			try:
+				pdf_to_read = PdfFileReader(open(f, 'r'))
+				pdf_info = pdf_to_read.getDocumentInfo()
+				title = pdf_info['/Title']
+				subject = pdf_info['/Subject']
+				writer.writerow([f, title, subject])
+				print 'Metadata for %s written successfully.' % (f)
+			except:
+				print 'ERROR reading file %s.' % (f)
+				#print sys.exc_info()
+				writer.writerow([f, 'ERROR', 'ERROR'])
+				pass
 
 if __name__ == "__main__":
 	extractor()
