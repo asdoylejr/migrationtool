@@ -20,10 +20,10 @@ def Downloader():
 	URLS = open("urlfile.txt").readlines()
 	
 	for url in URLS:
-		filename = url.split('/')[-1]
+		filename = url.rstrip().split('/')[-1]
 		try:
 			urlretrieve(url, filename, Percentage)
-			print "\n Successful download: %s" % filename
+			print "Successful download: %s" % filename
 		except:
 			print "Error downloading %s" % filename
 			
