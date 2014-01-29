@@ -2,7 +2,7 @@
 Script to extract metadata from PDFs.
 """
 import glob
-from pyPdf import PdfFileReader
+from pyPdf2 import PdfFileReader
 import csv
 import os
 import sys
