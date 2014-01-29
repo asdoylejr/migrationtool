@@ -6,11 +6,6 @@ import time
 import urlparse
 
 """
-List of file types for the script to search for.
-"""
-FILETYPE = ['\.pdf$', '\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$']
-
-"""
 Function that prints out progress data on the current download.
 """
 def Percentage(count, block_size, total_size):
@@ -50,6 +45,8 @@ def Downloader():
 		domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
 		path = urlinfo.path.rsplit('/', 1)[0]
 		
+		FILETYPE = ['\.pdf$', '\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$', '\.mp4$', '\.mp3$']
+
 		#Loop iterates through list of file types for open URL.
 		for types in FILETYPE:
 			for link in soup.findAll(href = compile(types)):
@@ -67,8 +64,46 @@ def Downloader():
 					print url, ': ', file
 					urlretrieve(file, filename, Percentage)		
 				except:
-					print 'Error retrieving %s ursing URL %s' % (link.get('href'), file)
+					print 'Error retrieving %s ursing URL %s' % (filename, file)
+
+			#for link in 
+
+"""
+Iterates through a list of specific download URLs and downloads them.
+"""
+def SimpleDownloader():
+	
+	URLS = open("urlfile.txt").readlines()
+	
+	for url in URLS:
+		filename = url.rstrip().split('/')[-1]
+		try:
+			urlretrieve(url, filename, Percentage)
+			print "Successful download: %s" % filename
+		except:
+			print "Error downloading %s" % filename
 
 if __name__ == '__main__':
-	Downloader()
-		
+	options = "ATTENTION: Ensure file 'urlfile.txt' is properly populated before continuing.\n\
+	\n\
+Options:\n\
+	\n\
+1. Parse a list of URLs to find downloadable content.\n\
+2. Download files from a pre-existing list of URLs.\n\
+3. Please explain configuring the URLs.\n"
+	print options
+	user_input = int(raw_input("Input number option you'd like to execute: "))
+	if user_input == 1:
+		print "Searching URL list for possible downloads."
+		Downloader()
+	elif user_input == 2:
+		print "Downloading files from list."
+		SimpleDownloader()
+	elif user_input == 3:
+		print "***************************************************************************\n\
+INSTRUCTIONS: in the same directory you are working with this file,\n\
+create a file titled 'urlfile.txt', if you do not have one already.\n\
+Populate the file with your URLs, either page URLs in which to search\n\
+for downloads, or a list of direct download links to automaticallydownload.\n\
+***************************************************************************"
+		print options
