@@ -1,4 +1,6 @@
 from BeautifulSoup import BeautifulSoup
+from pyPdf2 import PdfFileReader
+import csv
 from urllib import urlretrieve, urlopen
 from re import compile
 import sys
@@ -66,7 +68,8 @@ def Downloader():
 				except:
 					print 'Error retrieving %s ursing URL %s' % (filename, file)
 
-			#for link in 
+			#for link in soup.findAll(type = "text/javascript")
+			#	if 
 
 """
 Iterates through a list of specific download URLs and downloads them.
@@ -83,6 +86,29 @@ def SimpleDownloader():
 		except:
 			print "Error downloading %s" % filename
 
+def extractor():	
+	basedir = os.getcwd()
+	pdffiles = []
+	for x in os.listdir(basedir):
+		if x[-3:] == 'pdf':
+			pdffiles.append(x)
+	
+	with open('pdfmetadata.csv', 'w') as csvfile:
+		writer = csv.writer(csvfile)
+		for f in pdffiles:
+			try:
+				pdf_to_read = PdfFileReader(open(f, 'r'))
+				pdf_info = pdf_to_read.getDocumentInfo()
+				title = pdf_info['/Title']
+				subject = pdf_info['/Subject']
+				writer.writerow([f, title, subject])
+				print 'Metadata for %s written successfully.' % (f)
+			except:
+				print 'ERROR reading file %s.' % (f)
+				#print sys.exc_info()
+				writer.writerow([f, 'ERROR', 'ERROR'])
+				pass
+
 if __name__ == '__main__':
 	options = "ATTENTION: Ensure file 'urlfile.txt' is properly populated before continuing.\n\
 	\n\
@@ -92,13 +118,15 @@ Options:\n\
 2. Download files from a pre-existing list of URLs.\n\
 3. Please explain configuring the URLs.\n"
 	print options
-	user_input = int(raw_input("Input number option you'd like to execute: "))
+	user_input = int(raw_input("Input number option you would like to execute: "))
 	if user_input == 1:
 		print "Searching URL list for possible downloads."
 		Downloader()
+		extractor()
 	elif user_input == 2:
 		print "Downloading files from list."
 		SimpleDownloader()
+		extractor()
 	elif user_input == 3:
 		print "***************************************************************************\n\
 INSTRUCTIONS: in the same directory you are working with this file,\n\
