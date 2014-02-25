@@ -1,11 +1,12 @@
 from BeautifulSoup import BeautifulSoup
-from pyPdf2 import PdfFileReader
+#from pyPdf2 import PdfFileReader
 import csv
 from urllib import urlretrieve, urlopen
 from re import compile
 import sys
 import time
 import urlparse
+import os
 
 """
 Function that prints out progress data on the current download.
@@ -25,10 +26,12 @@ def Percentage(count, block_size, total_size):
 
 """
 Function that iterates through a list of URLs in a text file, searching
-for asset files to download.
+for files to download, and downloads them.
 """
 def Downloader():
 	
+    #Saves the base directory
+    basedir = os.getcwd()
     #Open up the text file full of URLs as a list.
     URLS = open("urlfile.txt").readlines()
 	#Attempts to open the URL or returns an error and passes.
@@ -45,6 +48,14 @@ def Downloader():
         urlinfo = urlparse.urlparse(url)
         domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
         path = urlinfo.path.rsplit('/', 1)[0]
+
+        #Creates nested directories to save the files based on the
+        #base URL path to avoid removal of duplicates.
+        webfile = urlinfo.path.split('/')[-1]
+        folderdir = urlinfo.path.replace(webfile, "").lstrip('/')
+        if not os.path.exists(folderdir):
+            os.makedirs(folderdir)
+        os.chdir(folderdir)
 		
         FILETYPE = ['\.pdf$', '\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$', '\.mp4$', '\.mp3$']
 
@@ -66,6 +77,7 @@ def Downloader():
                     urlretrieve(file, filename, Percentage)		
                 except:
                     print 'Error retrieving %s ursing URL %s' % (filename, file)
+        os.chdir(basedir)
 
 """
 Iterates through a list of specific download URLs and downloads them.
@@ -103,21 +115,31 @@ def extractor():
                 print 'ERROR reading file %s.' % (f)
                 #print sys.exc_info()
                 writer.writerow([f, 'ERROR', 'ERROR'])
-                pass
 
 if __name__ == '__main__':
-    options = "ATTENTION: Ensure file 'urlfile.txt' is properly populated before continuing.\n\
+    Downloader()
+
+"""
+if __name__ == '__main__':
+    options = ("ATTENTION: Ensure file 'urlfile.txt' is properly populated before continuing.\n\
     \n\
 Options:\n\
     \n\
 1. Parse a list of URLs to find downloadable content.\n\
 2. Download files from a pre-existing list of URLs.\n\
-3. Please explain configuring the URLs.\n"
-    print options
+3. Please explain configuring the URLs.\n").split()
+    options_list = []
+    for letter in options:
+    	options_list.append(letter)
+    for letter in options_list:
+    	sys.stdout.write(letter)
+    	sys.stdout.flush()
+    	time.sleep(0.01)
+    
     user_input = int(raw_input("Input number option you would like to execute: "))
     if user_input == 1:
         print "Searching URL list for possible downloads."
-                Downloader()
+        Downloader()
         extractor()
     elif user_input == 2:
         print "Downloading files from list."
@@ -131,3 +153,4 @@ Populate the file with your URLs, either page URLs in which to search\n\
 for downloads, or a list of direct download links to automaticallydownload.\n\
 ***************************************************************************"
         print options
+"""
