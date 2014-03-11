@@ -7,12 +7,11 @@ import csv
 import os
 import sys
 
-class pdf_extractor():   
-    basedir = os.getcwd()
-    pdffiles = []
-    for x in os.listdir(basedir):
-        if x[-3:] == 'pdf':
-            pdffiles.append(x)
+class pdf_extractor():
+
+    def __init__(self):
+        self.basedir = os.getcwd()
+        self.pdffiles = []
 
     def extractor(self):   
         with open('pdfmetadata.csv', 'w') as csvfile:
@@ -28,7 +27,7 @@ class pdf_extractor():
                 except:
                     """
                     Working on alternate reader in case of failure. 
-                    
+
                     pdf_to_read = PDFParser(open(f, 'rb'))
                     doc = PDFDocument
                     """
@@ -38,6 +37,15 @@ class pdf_extractor():
                     writer.writerow([f, 'ERROR', 'ERROR'])
                     pass
 
-if __name__ == "__main__":
+def main():
+
     c = pdf_extractor()
+
+    for x in os.listdir(basedir):
+        if x[-3:].lower() == 'pdf':
+            pdffiles.append(x)
+
     c.extractor()
+
+if __name__ == "__main__":
+    main()
