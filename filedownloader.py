@@ -1,11 +1,12 @@
 from bs4 import BeautifulSoup as bs
-import csv
-from urllib import urlretrieve, urlopen
+from urllib.request import urlretrieve, urlopen
 from re import compile
+import sqlite3 as lite
 import sys
 import time
-import urlparse
+from urllib.parse import urlparse, urlunparse, urljoin
 import os
+import csv
 
 """
 Function that prints out progress data on the current download.
@@ -26,6 +27,7 @@ def Percentage(count, block_size, total_size):
 Function that iterates through a list of URLs in a text file, searching
 for files to download, and downloads them, placing in embedded folders.
 """
+
 class downloadtools():
    
     basedir = os.getcwd()
@@ -34,62 +36,62 @@ class downloadtools():
     def __init__(self):
         pass
 
-    def downloader(self):   
-        with open('data.csv', 'w') as csvfile:
-            writer = csv.writer(csvfile)
+    def downloader(self):
+        with open('data.csv', 'w') as datafile:
+            writer = csv.writer(datafile)
             for url in downloadtools.URLS:
                 try:
                     html_data = urlopen(url)
-                except:
-                    print 'Error opening URL: ' + url
+                except Exception as e:
+                    print('Error opening URL: ' + url, e)
+                    writer.writerow([url])
                     pass
                 
                 #Creates a BS object out of the open URL.
                 soup = bs(html_data)
                 #Parsing the URL for later use
-                urlinfo = urlparse.urlparse(url)
-                domain = urlparse.urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
+                urlinfo = urlparse(url)
+                domain = urlunparse((urlinfo.scheme, urlinfo.netloc, '', '', '', ''))
                 path = urlinfo.path.rsplit('/', 1)[0]
 
-                #Creates nested directories to save the files based on the
-                #base URL path to avoid removal of duplicates.
-                webfile = urlinfo.path.split('/')[-1]
-                folderdir = urlinfo.path.replace(webfile, "").lstrip('/')
-                if not os.path.exists(folderdir):
-                    os.makedirs(folderdir)
-                os.chdir(folderdir)
-                
                 FILETYPE = ['\.pdf$', '\.ppt$', '\.pptx$', '\.doc$', '\.docx$', '\.xls$', '\.xlsx$', '\.wmv$', '\.mp4$', '\.mp3$']
 
                 #Loop iterates through list of file types for open URL.
                 for types in FILETYPE:
                     for link in soup.findAll(href = compile(types)):
-                        file = link.get('href')
-                        filename = file.split('/')[-1]
+                        urlfile = link.get('href')
+                        filename = urlfile.split('/')[-1]
+                        while os.path.exists(filename):
+                            try:
+                                fileprefix = filename.split('_')[0]
+                                filetype = filename.split('.')[-1]
+                                num = int(filename.split('.')[0].split('_')[1])
+                                filename = fileprefix + '_' + str(num + 1) + '.' + filetype
+                            except Exception as e:
+                                filetype = filename.split('.')[1]
+                                fileprefix = filename.split('.')[0] + '_' + str(1)
+                                filename = fileprefix + '.' + filetype
+                                print e
                         
                         #Creates a full URL if needed.
-                        if '://' not in file and not file.startswith('//'):
-                            if not file.startswith('/'):
-                                file = urlparse.urljoin(path, file)
-                            file = urlparse.urljoin(domain, file)
+                        if '://' not in urlfile and not urlfile.startswith('//'):
+                            if not urlfile.startswith('/'):
+                                urlfile = urljoin(path, urlfile)
+                            urlfile = urljoin(domain, urlfile)
                         
-                        #Downloads the file or returns error for manual inspection
+                        #Downloads the urlfile or returns error for manual inspection
                         try:
-                            urlretrieve(file, filename, Percentage)
-                            os.chdir(downloadtools.basedir)
-                            writer.writerow(["SUCCESS", url, file, filename])
-                            os.chdir(folderdir)
-                            print "     SUCCESS"
-                        except:
-                            os.chdir(downloadtools.basedir)
-                            writer.writerow(["ERROR", url, file, filename])
-                            os.chdir(folderdir)
-                            print "     ERROR"
-                os.chdir(downloadtools.basedir)
+                            urlretrieve(urlfile, filename, Percentage)
+                            print('success')
+                            writer.writerow([url, urlfile, filename])
+                        except Exception as e:
+                            writer.writerow(['ERROR', url, urlfile, filename])
+                            print('error', e)
 
     """
     Iterates through a list of specific download URLs and downloads them.
     """
+
     def simple_downloader(self):
         for url in downloadtools.URLS:
             filename = url.rstrip().split('/')[-1]
@@ -99,9 +101,6 @@ class downloadtools():
             except:
                 print "Error downloading %s" % filename
 
-def main():
+if __name__ == '__main__':
     bot = downloadtools()
     bot.downloader()
-
-if __name__ == '__main__':
-    main()
