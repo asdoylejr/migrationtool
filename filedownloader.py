@@ -71,7 +71,7 @@ class downloadtools():
                                 filetype = filename.split('.')[1]
                                 fileprefix = filename.split('.')[0] + '_' + str(1)
                                 filename = fileprefix + '.' + filetype
-                                print e
+                                print(e)
                         
                         #Creates a full URL if needed.
                         if '://' not in urlfile and not urlfile.startswith('//'):
@@ -97,9 +97,13 @@ class downloadtools():
             filename = url.rstrip().split('/')[-1]
             try:
                 urlretrieve(url, filename, Percentage)
-                print "Successful download: %s" % filename
+                print("Successful download: %s" % filename)
             except:
-                print "Error downloading %s" % filename
+                print("Error downloading %s" % filename)
+
+def main():
+    bot = downloadtools()
+    bot.downloader()
 
 if __name__ == '__main__':
     bot = downloadtools()
