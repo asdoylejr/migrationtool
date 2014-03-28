@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlretrieve, urlopen
-from re import compile
+from re import compile, match
 import sqlite3 as lite
 import sys
 import time
@@ -61,17 +61,17 @@ class downloadtools():
                     for link in soup.findAll(href = compile(types)):
                         urlfile = link.get('href')
                         filename = urlfile.split('/')[-1]
+                        regex = compile(r'\w+_[1-9]\.')
                         while os.path.exists(filename):
-                            try:
-                                fileprefix = filename.split('_')[0]
+                            if regex.match(filename):
                                 filetype = filename.split('.')[-1]
-                                num = int(filename.split('.')[0].split('_')[1])
+                                num = int(filename.split('.')[0].split('_')[-1])
+                                fileprefix = filename.split('.')[0].split('_' + str(num))[0]
                                 filename = fileprefix + '_' + str(num + 1) + '.' + filetype
-                            except Exception as e:
+                            else:
                                 filetype = filename.split('.')[1]
                                 fileprefix = filename.split('.')[0] + '_' + str(1)
                                 filename = fileprefix + '.' + filetype
-                                print(e)
                         
                         #Creates a full URL if needed.
                         if '://' not in urlfile and not urlfile.startswith('//'):
@@ -106,4 +106,5 @@ def main():
     bot.downloader()
 
 if __name__ == '__main__':
-    main()
+    bot = downloadtools()
+    bot.downloader()
