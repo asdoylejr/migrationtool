@@ -61,6 +61,7 @@ class downloadtools():
                     for link in soup.findAll(href = compile(types)):
                         urlfile = link.get('href')
                         filename = urlfile.split('/')[-1]
+                        #Check if filename exists and adds trailing numbers to filename.
                         regex = compile(r'\w+_[1-9]\.')
                         while os.path.exists(filename):
                             if regex.match(filename):
@@ -87,19 +88,20 @@ class downloadtools():
                         except Exception as e:
                             writer.writerow(['ERROR', url, urlfile, filename])
                             print('error', e)
-
-    """
-    Iterates through a list of specific download URLs and downloads them.
-    """
-
+    
+    #Simpler method if I just have a list of direct URLs to download.
     def simple_downloader(self):
-        for url in downloadtools.URLS:
-            filename = url.rstrip().split('/')[-1]
-            try:
-                urlretrieve(url, filename, Percentage)
-                print("Successful download: %s" % filename)
-            except:
-                print("Error downloading %s" % filename)
+        with open('data.csv', 'w') as csvfile:
+            writer = csv.writer(csvfile)
+                for url in downloadtools.URLS:
+                filename = url.rstrip().split('/')[-1]
+                try:
+                    urlretrieve(url, filename, Percentage)
+                    print("Successful download: %s" % filename)
+                    writer.writerow([url, filename])
+                except Exception as e:
+                    print("Error downloading %s" % filename), e
+                    writer.writerow(['error', url, filename])
 
 def main():
     bot = downloadtools()
