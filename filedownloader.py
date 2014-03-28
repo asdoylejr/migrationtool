@@ -106,5 +106,4 @@ def main():
     bot.downloader()
 
 if __name__ == '__main__':
-    bot = downloadtools()
-    bot.downloader()
+    main()
