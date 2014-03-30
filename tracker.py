@@ -19,8 +19,8 @@ class Tracker():
                 try:
                     html_data = urlopen(url)
                     print('Successfully opened %s' % url)
-                except:
-                    print('Error opening URL: ' + url)
+                except Exception as e:
+                    print('Error opening URL: ' + url), e
                     writer.writerow([url, 'ERROR'])
 
                 soup = bs(html_data)
